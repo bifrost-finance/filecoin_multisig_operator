@@ -1,5 +1,5 @@
 import EnvParamsProvider from './envParamsProvider';
-import {Logger} from 'winston';
+import { Logger } from 'winston';
 import {
   message,
   MsigMethod,
@@ -10,7 +10,7 @@ import {
   BuiltInMethod,
 } from './types';
 import BigNumber from 'bignumber.js';
-import {sleep} from './utils';
+import { sleep } from './utils';
 const filecoin_signer = require('@zondax/filecoin-signing-tools');
 const Web3 = require('web3');
 
@@ -145,22 +145,29 @@ export default class FilecoinMultisigHandler {
     txCid: string
   ) {
     try {
+      // 从.env 读取谁签名 发起交易 f1 开头的账户
       const selfAccount = this.envParamsProvider.getFilecoinSignerAccount();
 
+      // 提案参数
       let proposal_params = {
-        // Requester: this.envParamsProvider.getFilecoinMainNodeAddress(),
+        // 主节点地址,
         Requester: this.envParamsProvider.getFilecoinMainNodeAddress(),
         To: to,
         Value: amount,
-        Method: 0,
+        // 一般要改
+        Method: 3844450837,
         Params: '',
       };
 
+      // 提案 hash
       const proposalHash = filecoin_signer.computeProposalHash(proposal_params);
-      const receiptMessage = await this.waitTransactionReceipt(txCid);
-      const recpt = JSON.parse(JSON.stringify(receiptMessage));
+      // const receiptMessage = await this.waitTransactionReceipt(txCid);
+      // const recpt = JSON.parse(JSON.stringify(receiptMessage));
+      // const txnid = recpt['ReturnDec']['TxnID'];
 
-      const txnid = recpt['ReturnDec']['TxnID'];
+      // 一般要改：交易 id，需要从交易收据里获取
+      // 527，528，544 1553
+      const txnid = 1912;
       console.log(`txnid: ${txnid}`);
 
       let approve_params = {
@@ -170,9 +177,10 @@ export default class FilecoinMultisigHandler {
 
       console.log(approve_params);
 
-      // 获取nounce
+      // 获取Nonce值：获取当前账户的Nonce值，Nonce是为了确保每笔交易只被处理一次的一个值。
       const nonce = await this.getNonce(selfAccount);
 
+      // 创建待批准的多签名交易对象：包含了多签名钱包的地址、交易发送者、Nonce、value（0）、gaslimit（0）、gasfeecap（0）、gaspremium（0）、方法（多签名批准）以及序列化并格式化后的批准参数
       let approve_multisig_transaction = {
         to: this.envParamsProvider.getFilecoinMultisigAddress(),
         from: selfAccount,
@@ -189,11 +197,12 @@ export default class FilecoinMultisigHandler {
       const approve_multisig_transaction_with_gas = await this.getGasEstimation(
         approve_multisig_transaction as message
       );
-
+        // 签名 并发送交易
       const receipt: any = await this.signAndSendTransaction(
         approve_multisig_transaction_with_gas
       );
 
+      // 从交易收据中提取交易的CID(Content Identifier)，然后打印到控制台，并将该CID作为函数结果返回
       const cid = receipt['Message']['/'];
       console.log(`cid: ${cid}`);
 
@@ -227,7 +236,7 @@ export default class FilecoinMultisigHandler {
           jsonrpc: '2.0',
           method: 'Filecoin.GasEstimateMessageGas',
           id: 1,
-          params: [message, {MaxFee: '0'}, null],
+          params: [message, { MaxFee: '0' }, null],
         })
         .then((response: any) => {
           console.log(`gas result: ${JSON.stringify(response.data)}`);
@@ -483,7 +492,7 @@ export default class FilecoinMultisigHandler {
   async getMessageInfoByCid(messageCid: string) {
     return new Promise(resolve => {
       try {
-        const cid = {'/': messageCid};
+        const cid = { '/': messageCid };
 
         this.requester
           .post('', {
@@ -1287,9 +1296,13 @@ export default class FilecoinMultisigHandler {
     return new Promise(async resolve => {
       try {
         let propose_params = {
+          // 矿工node ID（minerId）
           To: minerId,
+          // 这个交易的价值(Value，这里是'0'，表明此交易不涉及任何Filecoin的转账)
           Value: '0',
+          //用于更改所有者操作的Smart Contract 方法号码（Method: 23，在Filecoin网络中，这个方法是用于更改多签名账户所有者）
           Method: 23,
+          // 以及新所有者的编码参数(Params: encodedParam)
           Params: encodedParam,
         };
 
@@ -1460,9 +1473,27 @@ export default class FilecoinMultisigHandler {
           params: this.serializeAndFormatParams(approve_params),
         };
 
+
         // 获取预估gas费
-        const approve_multisig_transaction_with_gas =
+        let approve_multisig_transaction_with_gas: any =
           await this.getGasEstimation(approve_multisig_transaction as message);
+        approve_multisig_transaction_with_gas.gasfeecap = new BigNumber(
+          approve_multisig_transaction_with_gas.gasfeecap
+        )
+          .multipliedBy(2)
+          .toFixed(0);
+        approve_multisig_transaction_with_gas.gaspremium = new BigNumber(
+          approve_multisig_transaction_with_gas.gaspremium
+        )
+          .multipliedBy(2)
+          .toFixed(0);
+        approve_multisig_transaction_with_gas.gaslimit = new BigNumber(
+          approve_multisig_transaction_with_gas.gaslimit
+        )
+          .multipliedBy(2)
+          .toFixed(0);
+
+
 
         const receipt: any = await this.signAndSendTransaction(
           approve_multisig_transaction_with_gas
@@ -1577,3 +1608,6 @@ export default class FilecoinMultisigHandler {
     });
   }
 }
+
+
+
