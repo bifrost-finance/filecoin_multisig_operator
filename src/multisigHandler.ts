@@ -221,6 +221,7 @@ export default class FilecoinMultisigHandler {
 
   // 获取gas fee estimation
   async getGasEstimation(message: message) {
+    console.log(`getGasEstimation param: ${JSON.stringify(message)}`);
     return new Promise(resolve => {
       this.requester
         .post('', {
@@ -238,17 +239,19 @@ export default class FilecoinMultisigHandler {
 
   // 获取gas fee estimation
   async sendMessage(signed_message: any) {
+    console.log(`signed_message: ${JSON.stringify(signed_message)}`);
     return new Promise(resolve => {
       this.requester
-        .post('', {
-          jsonrpc: '2.0',
-          method: 'Filecoin.MpoolPush',
-          id: 1,
-          params: [signed_message],
-        })
-        .then((response: any) => {
-          resolve(response.data.result);
-        });
+      .post('', {
+        jsonrpc: '2.0',
+        method: 'Filecoin.MpoolPush',
+        id: 1,
+        params: [signed_message],
+      })
+      .then((response: any) => {
+        console.log(`response: ${JSON.stringify(response.data)}`);
+        resolve(response.data.result);
+      });
     });
   }
 
@@ -291,16 +294,24 @@ export default class FilecoinMultisigHandler {
   async signAndSendTransaction(transactionWithGas: any) {
     return new Promise(resolve => {
       try {
+
+        console.log(`transactionWithGas: ${transactionWithGas}`);
+
         const signed_transaction_multisig =
-          filecoin_signer.transactionSignLotus(
-            transactionWithGas,
-            this.getPrivateKey()
-          );
+            filecoin_signer.transactionSignLotus(
+                transactionWithGas,
+                this.getPrivateKey()
+            );
+
+        console.log(`signed_transaction_multisig: ${JSON.stringify(signed_transaction_multisig)}`);
 
         this.sendMessage(signed_transaction_multisig).then(result => {
+          console.log(`result: ${JSON.stringify(result)}`);
           let messageCid = JSON.parse(JSON.stringify(result))['/'];
+          console.log(`messageCid: ${JSON.stringify(messageCid)}`);
           this.waitTransactionReceipt(messageCid).then(receiptMessage => {
             const receipt = JSON.parse(JSON.stringify(receiptMessage));
+            console.log(`receipt: ${receipt}`);
             // if the transaction is not propose, the returnDec doesn't have txnid
             let txnid = receipt['ReturnDec']['TxnID'];
             console.log(`txnid: ${txnid}`);
@@ -1308,6 +1319,8 @@ export default class FilecoinMultisigHandler {
           method: MsigMethod.PROPOSE,
           params: this.serializeAndFormatParams(propose_params),
         };
+
+        console.log(`propose_multisig_transaction: ${JSON.stringify(propose_multisig_transaction)}`);
 
         // 获取预估gas费
         const propose_multisig_transaction_with_gas =
