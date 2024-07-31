@@ -1,4 +1,4 @@
-const {FilecoinSigner} = require('@blitslabs/filecoin-js-signer');
+const { FilecoinSigner } = require('@blitslabs/filecoin-js-signer');
 const filecoin_signer = new FilecoinSigner();
 
 async function main() {
@@ -11,20 +11,20 @@ async function main() {
 
   const network = 'mainnet';
 
-  // 生成私钥
-  const keys = await filecoin_signer.wallet.keyDerive(
-    mnemonic,
-    hdDerivationPath,
-    network
-  );
+  // // 生成私钥
+  // const keys = await filecoin_signer.wallet.keyDerive(
+  //   mnemonic,
+  //   hdDerivationPath,
+  //   network
+  // );
 
-  const privateKeyBase64 = Buffer.from(keys.privateKey, 'hex').toString(
+  const privateKeyBase64 = Buffer.from("hello", 'hex').toString(
     'base64'
   );
 
-  console.log(`mnemonic: ${mnemonic.toString()}`);
+  // console.log(`mnemonic: ${mnemonic.toString()}`);
   console.log(`base64 private key: ${privateKeyBase64}`);
-  console.log(keys);
+  // console.log(keys);
 }
 
 main();

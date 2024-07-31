@@ -1,7 +1,7 @@
 import getTransactionReceipt from './multisigHandler';
 import EnvParamsProvider from './envParamsProvider';
 import FilecoinMultisigHandler from './multisigHandler';
-import {getRequester} from './index';
+import { getRequester } from './index';
 const winston = require('winston');
 
 async function main() {
@@ -10,14 +10,14 @@ async function main() {
   const logger = winston.createLogger({
     level: 'info',
     format: winston.format.json(),
-    defaultMeta: {service: 'multisig-service'},
+    defaultMeta: { service: 'multisig-service' },
     transports: [
       //
       // - Write all logs with importance level of `error` or less to `error.log`
       // - Write all logs with importance level of `info` or less to `combined.log`
       //
-      new winston.transports.File({filename: 'error.log', level: 'error'}),
-      new winston.transports.File({filename: 'combined.log'}),
+      new winston.transports.File({ filename: 'error.log', level: 'error' }),
+      new winston.transports.File({ filename: 'combined.log' }),
     ],
   });
 
@@ -42,10 +42,11 @@ async function main() {
 
   // 
   let rs = await multisigHandler.approveMultisigTransfer(
-    'f02097134',
-    '1000000000000000000000',
-    '2019',
-    
+
+    'f02224632',
+    '62174456204484453202',
+    '14',
+
   );
 
 
@@ -56,7 +57,7 @@ async function main() {
   //   minerId,
   //   1951,
   //   encodedParam,
-    
+
   // );
 
   console.log(`result is: ${rs}`);

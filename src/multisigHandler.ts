@@ -1,5 +1,5 @@
 import EnvParamsProvider from './envParamsProvider';
-import {Logger} from 'winston';
+import { Logger } from 'winston';
 import {
   message,
   MsigMethod,
@@ -10,7 +10,7 @@ import {
   BuiltInMethod,
 } from './types';
 import BigNumber from 'bignumber.js';
-import {sleep} from './utils';
+import { sleep } from './utils';
 const filecoin_signer = require('@zondax/filecoin-signing-tools');
 const Web3 = require('web3');
 
@@ -152,26 +152,41 @@ export default class FilecoinMultisigHandler {
         Requester: this.envParamsProvider.getFilecoinMainNodeAddress(),
         To: to,
         Value: amount,
-        Method: '3844450837',
+        Method: 3844450837,
         Params: '',
       };
 
-      const proposalHash = filecoin_signer.computeProposalHash(proposal_params);
-      // const receiptMessage = await this.waitTransactionReceipt(txCid);
-      // const recpt = JSON.parse(JSON.stringify(receiptMessage));
+      let proposalHash;
 
-      // const txnid = recpt['ReturnDec']['TxnID'];
-      // console.log(`txnid: ${txnid}`);
+      try {
+        proposalHash = filecoin_signer.computeProposalHash(proposal_params);
+        console.log('Proposal Hash:', proposalHash);
+      } catch (error) {
+        console.log("Proposal Hash error");
+        console.error('Error computing proposal hash:', error);
+      }
+
+      const receiptMessage = await this.waitTransactionReceipt(txCid);
+      const recpt = JSON.parse(JSON.stringify(receiptMessage));
+
+      const txnid = recpt['ReturnDec']['TxnID'];
+      console.log(`txnid: ${txnid}`);
 
       let approve_params = {
         ID: txCid,
         ProposalHash: proposalHash.toString('base64'),
       };
 
-      console.log(approve_params);
+      console.log("===========approve_params:", approve_params);
 
       // 获取nounce
-      const nonce = await this.getNonce(selfAccount);
+      let nonce
+      try {
+        nonce = await this.getNonce(selfAccount);
+        console.log("nonce:", nonce)
+      } catch (error) {
+        console.error("nonce error:", error)
+      }
 
       let approve_multisig_transaction = {
         to: this.envParamsProvider.getFilecoinMultisigAddress(),
@@ -185,11 +200,18 @@ export default class FilecoinMultisigHandler {
         params: this.serializeAndFormatParams(approve_params),
       };
 
+      console.log()
+      let approve_multisig_transaction_with_gas;
       // 获取预估gas费
-      const approve_multisig_transaction_with_gas = await this.getGasEstimation(
-        approve_multisig_transaction as message
-      );
+      try {
+        approve_multisig_transaction_with_gas = await this.getGasEstimation(
+          approve_multisig_transaction as message
+        );
+        console.log("11111111 approve_multisig_transaction_with_gas")
 
+      } catch (error) {
+        console.error('Error computing proposal hash:', error);
+      }
       const receipt: any = await this.signAndSendTransaction(
         approve_multisig_transaction_with_gas
       );
@@ -228,7 +250,7 @@ export default class FilecoinMultisigHandler {
           jsonrpc: '2.0',
           method: 'Filecoin.GasEstimateMessageGas',
           id: 1,
-          params: [message, {MaxFee: '0'}, null],
+          params: [message, { MaxFee: '0' }, null],
         })
         .then((response: any) => {
           console.log(`gas result: ${JSON.stringify(response.data)}`);
@@ -242,25 +264,32 @@ export default class FilecoinMultisigHandler {
     console.log(`signed_message: ${JSON.stringify(signed_message)}`);
     return new Promise(resolve => {
       this.requester
-      .post('', {
-        jsonrpc: '2.0',
-        method: 'Filecoin.MpoolPush',
-        id: 1,
-        params: [signed_message],
-      })
-      .then((response: any) => {
-        console.log(`response: ${JSON.stringify(response.data)}`);
-        resolve(response.data.result);
-      });
+        .post('', {
+          jsonrpc: '2.0',
+          method: 'Filecoin.MpoolPush',
+          id: 1,
+          params: [signed_message],
+        })
+        .then((response: any) => {
+          console.log(`response: ${JSON.stringify(response.data)}`);
+          resolve(response.data.result);
+        });
     });
   }
 
   // 让参数serialize序列化变成一个hex string，然后转成buffer raw data，然后再转成base64格式的string,用于传到lotus服务器
   serializeAndFormatParams(params: any) {
     console.log(`params: ${JSON.stringify(params)}`);
-    const serializedParams = filecoin_signer.serializeParams(params);
-    const formatedRawData = this.hexToBase64(serializedParams);
+    let serializedParams
 
+    try {
+      serializedParams = filecoin_signer.serializeParams(params);
+      console.log("serializedParams")
+    } catch (error) {
+      console.error("serializedParams error:", error)
+    }
+    const formatedRawData = this.hexToBase64(serializedParams);
+    console.log("formatedRawData:", formatedRawData)
     return formatedRawData;
   }
 
@@ -298,10 +327,10 @@ export default class FilecoinMultisigHandler {
         console.log(`transactionWithGas: ${transactionWithGas}`);
 
         const signed_transaction_multisig =
-            filecoin_signer.transactionSignLotus(
-                transactionWithGas,
-                this.getPrivateKey()
-            );
+          filecoin_signer.transactionSignLotus(
+            transactionWithGas,
+            this.getPrivateKey()
+          );
 
         console.log(`signed_transaction_multisig: ${JSON.stringify(signed_transaction_multisig)}`);
 
@@ -494,7 +523,7 @@ export default class FilecoinMultisigHandler {
   async getMessageInfoByCid(messageCid: string) {
     return new Promise(resolve => {
       try {
-        const cid = {'/': messageCid};
+        const cid = { '/': messageCid };
 
         this.requester
           .post('', {
