@@ -9,19 +9,19 @@ export const TRANSFER = 'transfer';
 
 // form mainnet
 export const MULTISIG_ACTOR_CODE_CID =
-    'bafk2bzaceajcmsngu3f2chk2y7nanlen5xlftzatytzm6hxwiiw5i5nz36bfc';
+  'bafk2bzacecr5zqarfqak42xqcfeulsxlavcltawsx2fvc7zsjtby6ti4b3wqc';
 
 // for calibration
 export const CALIBRATION_MULTISIG_ACTOR_CODE_CID =
-    'bafk2bzacedwx4svscsp6wqqu2vlcunjihvvm4u2jnsqjkwutjhir7dwtl7z6m';
+  'bafk2bzacedwx4svscsp6wqqu2vlcunjihvvm4u2jnsqjkwutjhir7dwtl7z6m';
 
 // for calibration
 export const CALIBRATION_STORAGE_MINER_ACTOR_CODE_CID =
-    'bafk2bzacecr7ozkdz7l2pq3ig5qxae2ysivbnojhsn4gw3o57ov4mhksma7me';
+  'bafk2bzacecr7ozkdz7l2pq3ig5qxae2ysivbnojhsn4gw3o57ov4mhksma7me';
 
 // for mainnet
 export const STORAGE_MINER_ACTOR_CODE_CID =
-    'bafk2bzacea3f43rxzemmakjpktq2ukayngean3oo2de5cdxlg2wsyn53wmepc';
+  'bafk2bzacea3f43rxzemmakjpktq2ukayngean3oo2de5cdxlg2wsyn53wmepc';
 
 /// interfaces
 export interface message {
