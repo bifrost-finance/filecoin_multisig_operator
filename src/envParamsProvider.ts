@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 export default class EnvParamsProvider {
-  constructor(private env: {[k: string]: string | undefined}) {}
+  constructor(private env: { [k: string]: string | undefined }) { }
 
   // Filecoin params
   // Infura
@@ -69,6 +69,22 @@ export default class EnvParamsProvider {
     const signers_list = signers_string?.split('|');
     return signers_list;
   }
+
+  // Filecoin private key
+  getVaulToken() {
+    return this.getValue('VAULT_TOKEN');
+  }
+
+  getVaultKey() {
+    return this.getValue('KEY_NAME');
+  }
+  getVaultSecret() {
+    return this.getValue('SECRET');
+  }
+  getVaultUrl() {
+    return this.getValue('VAULT_URL');
+  }
+
 
   getValue(key: string): string {
     return this.env[key] || '';

@@ -11,6 +11,7 @@ import {
 } from './types';
 import BigNumber from 'bignumber.js';
 import { sleep } from './utils';
+import { aesDecrypt } from './crypto';
 const filecoin_signer = require('@zondax/filecoin-signing-tools');
 const Web3 = require('web3');
 
@@ -315,10 +316,40 @@ export default class FilecoinMultisigHandler {
     );
 
     const privateKey = this.base64ToBufferRawData(recovered_key.private_base64);
-
+    // 返回私钥的 raw 格式
     return privateKey;
   }
 
+  async getPrivateKeyFromVault() {
+    const vaultUrl = this.envParamsProvider.getVaultUrl();
+    const vaultToken = this.envParamsProvider.getVaulToken();
+    const keyName = this.envParamsProvider.getVaultKey();
+    const secret = this.envParamsProvider.getVaultSecret();
+
+    let PrivateKeyString: string;
+    try {
+      PrivateKeyString = await aesDecrypt({
+        vaultUrl: vaultUrl,
+        vaultToken: vaultToken,
+        secret: secret,
+        keyName: keyName,
+      });
+
+      console.log('Decrypted secret:', PrivateKeyString);
+
+      const recovered_key = filecoin_signer.keyRecover(
+        this.hexToBufferRawData(PrivateKeyString)
+      );
+
+      const privateKey = this.base64ToBufferRawData(recovered_key.private_base64);
+      // 返回私钥的 raw 格式
+      return privateKey;
+    } catch (error) {
+      console.error('Error decrypting secret:', error);
+      return '';
+    }
+
+  }
   // 签名，并发送至lotus服务器上
   async signAndSendTransaction(transactionWithGas: any) {
     return new Promise(resolve => {

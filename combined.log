@@ -25,3 +25,7 @@
 {"level":"info","message":"error: TypeError [ERR_INVALID_ARG_TYPE]: The first argument must be of type string or an instance of Buffer, ArrayBuffer, or Array or an Array-like Object. Received undefined","service":"multisig-service"}
 {"level":"info","message":"2024-07-31T10:33:48.286Z: \n No command matches! \n\n","service":"multisig-service"}
 {"level":"info","message":"error: SyntaxError: \"undefined\" is not valid JSON","service":"multisig-service"}
+{"level":"info","message":"2024-08-14T15:08:50.644Z: \n No command matches! \n\n","service":"multisig-service"}
+{"level":"info","message":"2024-08-14T15:12:56.945Z: \n No command matches! \n\n","service":"multisig-service"}
+{"level":"info","message":"2024-08-14T15:15:13.412Z: \n No command matches! \n\n","service":"multisig-service"}
+{"level":"info","message":"2024-08-14T15:18:04.558Z: \n No command matches! \n\n","service":"multisig-service"}

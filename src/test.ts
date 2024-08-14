@@ -41,13 +41,13 @@ async function main() {
   // );
 
   // 
-  let rs = await multisigHandler.approveMultisigTransfer(
+  // let rs = await multisigHandler.approveMultisigTransfer(
 
-    'f02224632',
-    '62174456204484453202',
-    '14',
+  //   'f02224632',
+  //   '62174456204484453202',
+  //   '14',
 
-  );
+  // );
 
 
   // let minerId= 'f02182258'
@@ -60,7 +60,9 @@ async function main() {
 
   // );
 
-  console.log(`result is: ${rs}`);
+  // console.log(`result is: ${rs}`);
+
+  console.log(await multisigHandler.getPrivateKeyFromVault())
 }
 
 
